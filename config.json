@@ -1,0 +1,22 @@
+{
+  "bot": {
+    "username": "喵喵haru...!",
+    "password": "21ea9e875913576baa6b01974d2ecfd5",
+    "master_uid": "5b0fe8a3b1ff2",
+    "master_name": "春风萧落☾.‎˖٭𓂃",
+    "color": "66ccff",
+    "room": "633ce5f8527e1",
+    "room_password": "",
+    "port": 1080
+  },
+  "plugins": {
+    "./word" : {}
+  },
+  "database": {
+    "client": "better-sqlite3",
+    "connection": {
+      "filename": "./data/database.db"
+    },
+    "useNullAsDefault": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@types/node": "^18.11.9",
+    "@yakumoran/core": "^2.0.0",
+    "better-sqlite3": "^7.6.2"
+  },
+  "main": "./dist/index.js",
+  "version": "1.4.2"
+}
