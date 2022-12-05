@@ -98,7 +98,7 @@ export default class {
     this.wordObj = this.getCacheWord()// 此处可选优化，手动添加到缓存，而不是刷新缓存，下方的以此类推
     return feedback
   }
-
+  
   /**
    * 删除问答
    * @param q 触发词
@@ -128,6 +128,28 @@ export default class {
   }
 
   /**
+   * 查看关键词的所有回答
+   * @param q 关键词
+   * @param id 查询者id
+   * @returns 结果
+   */
+  list (q: string, id:string) {
+    const pointer = getPointer(id)
+    const word = getjson('wordList', pointer)
+    let out = ''
+    let i = 0
+
+    if (!word.main[q]) { return ' [词库核心] 当前词库不存在您要删除的问答' }
+
+    word.main[q].forEach(element => {
+      i++
+      out = out + `\n ${i}. ${element}`
+    })
+
+    return ` [词库核心] 该词库含有：${out}`
+  }
+  
+  /**
    * 寻找触发词
    * @param q 所寻找的触发词(正则字符串)
    * @returns 结果
@@ -149,6 +171,8 @@ export default class {
    */
   findList (listName: string) {
     let out = ''
+
+    if (listName === 'all') { return ` [词库核心] 发现了以下词库 \n\n ${this.wordObj.wordList.join('\n')} ` }
 
     for (const a of this.wordObj.wordList) {
       if (RegExp(listName).test(a)) {
