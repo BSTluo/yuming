@@ -1,14 +1,20 @@
 import { App, Plugin, PrivateMessageEvent, PublicMessageEvent } from "@yakumoran/core"
 import * as word from './api/index'
+import * as fs from 'fs'
+import * as path from 'path'
 
 export default (app: App) => {
   class wordCore extends Plugin {
     async init() {
+      
       this.plugin_author = '春风萧落'
       this.plugin_description = '词库3.0-dev'
       this.plugin_id = 'word'
       this.plugin_name = '词库核心'
       this.plugin_version = '3.0-dev'
+
+      const config = JSON.parse(fs.readFileSync(path.join('../config.json')).toString())
+      if (!word.permissions.have('word.*', config.bot.master_uid)) { word.permissions.add('word.*', config.bot.master_uid) }
     }
 
     @app.decorators.EventListener('PublicMessage')
@@ -110,16 +116,44 @@ export default (app: App) => {
     }
 
     @app.decorators.Command({
-      name: '.库表<触发词/all>',
-      command: /^\.表([\s\S]+?)$/,
+      name: '.库表<库名/all>',
+      command: /^\.库表([\s\S]+?)$/,
       desc: '查看拥有的词库',
       usage: '.库表默认',
       privateChat: true, // 是否接受私聊消息(可选，默认为true)
       publicChat: true // 是否接受群聊消息(可选，默认为true)
     })
-    public (msg: PublicMessageEvent, args: RegExpExecArray) {
+    public findList(msg: PublicMessageEvent, args: RegExpExecArray) {
       // 回复结果
       this.app.api.sendPublicMessage(word.editor.findList(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.栈<库名/all>',
+      command: /^\.栈([\s\S]+?)$/,
+      desc: '查看某词库拥有的所有触发词',
+      usage: '.栈默认',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public passiveList(msg: PublicMessageEvent, args: RegExpExecArray) {
+      // 回复结果
+      this.app.api.sendPublicMessage(word.editor.passiveList(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.赋权<uid> <权限名>',
+      command: /^\.赋权\s+\[@([\s\S]+?)@\]\s+([\s\S]+?)$/,
+      desc: '给谁权限',
+      usage: '.栈默认',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public addPermission(msg: PublicMessageEvent, args: RegExpExecArray) {
+      // 回复结果
+      if (word.permissions.have('word.admin', msg.uid))
+
+      this.app.api.sendPublicMessage(word.permissions.add(args[2], args[1].toLowerCase()))
     }
   }
   return wordCore

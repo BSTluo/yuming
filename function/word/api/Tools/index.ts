@@ -4,7 +4,7 @@ import * as path from 'path'
 export const command = {
   /**
   * 返回一个文件的json对象
-  * @param dir data文件目录
+  * @param dir 文件目录
   * @param list 词库文件目录（wordConfig/userData/wordList/recycleBin）
   * @param name 词库文件名
   * @return 词库json对象
