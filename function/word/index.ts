@@ -13,7 +13,7 @@ export default (app: App) => {
       this.plugin_name = '词库核心'
       this.plugin_version = '3.0-dev'
 
-      const config = JSON.parse(fs.readFileSync(path.join('../config.json')).toString())
+      const config = JSON.parse(fs.readFileSync(path.join(process.cwd(),'config.json')).toString())
       if (!word.permissions.have('word.*', config.bot.master_uid)) { word.permissions.add('word.*', config.bot.master_uid) }
     }
 
