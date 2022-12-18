@@ -3,7 +3,7 @@
     "experimentalDecorators": true,
     "target": "ES2021",
     "moduleResolution": "Node",
-    "declaration": true,
+    "declaration": false,
     "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "resolveJsonModule": true,
