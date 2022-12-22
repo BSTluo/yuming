@@ -369,10 +369,28 @@ export default class {
    */
   viewWriter (dbName: string) {
     const word = getjson('wordList', dbName)
-    if (!word.author) { return 0 }
+    if (!word.author) { return null }
 
     return word.author
   } // 谁是编写者(这边不封装，后期为花园手动封装)
+
+  /**
+   * 判断对方是否为作者
+   * @param id 寻找id
+   * @param dbname 词库名
+   * @returns true/false
+   */
+  isWriter (id: string) {
+    const dbName = getPointer(id)
+    const adminList = this.viewWriter(dbName)
+    if (!adminList) return ' [词库核心] isWriter出现异常'
+
+    if (adminList.includes(id)) {
+      return true
+    } else {
+      return false
+    }
+  }
 
   /**
    * 设定背包清单值

@@ -85,8 +85,8 @@ export default (app: App) => {
     })
     public setList(msg: PublicMessageEvent, args: RegExpExecArray) {
       // 回复结果
-      const adminlist = word.editor.viewWriter(args[1])
-      if (adminlist.includes(msg.uid)) {
+      const adminlist = word.editor.isWriter(msg.uid)
+      if (adminlist) {
         this.app.api.sendPublicMessage(word.editor.changePointer(args[1], msg.uid))
       } else {
         this.app.api.sendPublicMessage(' [词库核心] 您可能不是此词库的作者，无法入库')
@@ -281,11 +281,41 @@ export default (app: App) => {
       publicChat: true // 是否接受群聊消息(可选，默认为true)
     })
     public viewWriter(msg: PublicMessageEvent, args: RegExpExecArray) {
-      this.app.api.sendPublicMessage(word.editor.rmWriter(args[1], msg.uid))
+      this.app.api.sendPublicMessage(word.editor.viewWriter(args[1]))
     }
 
-    // 设定背包清单值
-    // 删除背包清单中的某一项
+    @app.decorators.Command({
+      name: '.增包<物品名称>',
+      command: /^.增包([\s\S]+?)$/,
+      desc: '添加某物品到当前词库的物品清单',
+      usage: '.增包小鱼干',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public setPack(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (word.editor.isWriter(msg.uid)) {
+        this.app.api.sendPublicMessage(word.editor.setPack(msg.uid, args[1]))
+      } else {
+        this.app.api.sendPublicMessage(' [词库核心] 您不是当前词库的开发者，请检查当前所入的库')
+      }
+    }
+
+    @app.decorators.Command({
+      name: '.删包<物品名称>',
+      command: /^.删包([\s\S]+?)$/,
+      desc: '删除某物品到当前词库的物品清单',
+      usage: '.删包小鱼干',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public delPack(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (word.editor.isWriter(msg.uid)) {
+        this.app.api.sendPublicMessage(word.editor.delPack(msg.uid, args[1]))
+      } else {
+        this.app.api.sendPublicMessage(' [词库核心] 您不是当前词库的开发者，请检查当前所入的库')
+      }
+    }
+
     // 查看的背包清单
     // 添加主动式词库
     // 删除主动词库
