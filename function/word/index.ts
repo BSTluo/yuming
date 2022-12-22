@@ -42,7 +42,7 @@ export default (app: App) => {
       publicChat: true // 是否接受群聊消息(可选，默认为true)
     })
     public addWord(msg: PublicMessageEvent, args: RegExpExecArray) {
-      if (!word.permissions.have('word.edit.add', msg.uid)) return
+      if (!word.permissions.have('word.edit.add', msg.uid)) return ' [词库核心] word.edit.add 权限不足'
       // 发送消息
       this.app.api.sendPublicMessage(word.editor.add(args[1], args[2], msg.uid))
     }
@@ -56,7 +56,7 @@ export default (app: App) => {
       publicChat: true // 是否接受群聊消息(可选，默认为true)
     })
     public delWord(msg: PublicMessageEvent, args: RegExpExecArray) {
-      if (!word.permissions.have('word.edit.del', msg.uid)) return
+      if (!word.permissions.have('word.edit.rm', msg.uid)) return ' [词库核心] word.edit.rm 权限不足'
 
       // 回复结果
       this.app.api.sendPublicMessage(word.editor.del(args[1], args[2], msg.uid))
@@ -85,7 +85,12 @@ export default (app: App) => {
     })
     public setList(msg: PublicMessageEvent, args: RegExpExecArray) {
       // 回复结果
-      this.app.api.sendPublicMessage(word.editor.changePointer(args[1], msg.uid))
+      const adminlist = word.editor.viewWriter(args[1])
+      if (adminlist.includes(msg.uid)) {
+        this.app.api.sendPublicMessage(word.editor.changePointer(args[1], msg.uid))
+      } else {
+        this.app.api.sendPublicMessage(' [词库核心] 您可能不是此词库的作者，无法入库')
+      }
     }
 
     @app.decorators.Command({
@@ -144,17 +149,149 @@ export default (app: App) => {
     @app.decorators.Command({
       name: '.赋权<uid> <权限名>',
       command: /^\.赋权\s+\[@([\s\S]+?)@\]\s+([\s\S]+?)$/,
-      desc: '给谁权限',
+      desc: '给一位用户权限',
       usage: '.栈默认',
       privateChat: true, // 是否接受私聊消息(可选，默认为true)
       publicChat: true // 是否接受群聊消息(可选，默认为true)
     })
     public addPermission(msg: PublicMessageEvent, args: RegExpExecArray) {
       // 回复结果
-      if (word.permissions.have('word.admin', msg.uid))
+      if (!word.permissions.have('word.admin', msg.uid)) return ' [词库核心] word.admin 权限不足'
 
       this.app.api.sendPublicMessage(word.permissions.add(args[2], args[1].toLowerCase()))
     }
+
+    @app.decorators.Command({
+      name: '.<物品名称>:<库名>天梯',
+      command: /^.([\s\S]+?):([\s\S]+?)天梯$/,
+      desc: '查看某物品的数量',
+      usage: '.小鱼干天梯',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public itemList(msg: PublicMessageEvent, args: RegExpExecArray) {
+      const a = '\\\\\\*\n' + word.driver.itemList(args[1], args[2], { header: ' [@', body: '@] ' }, true)
+      this.app.api.sendPublicMessage(a)
+    }
+
+    @app.decorators.Command({
+      name: '.删库<库名>',
+      command: /^.删库([\s\S]+?)$/,
+      desc: '将一个库移动到回收站',
+      usage: '.删库默认',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public rmList(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.listRm', msg.uid)) return ' [词库核心] word.edit.listRm 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.killList(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.清空回收站',
+      command: /^.清空回收站$/,
+      desc: '将回收站清空',
+      usage: '.清空回收站',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public clearBackup(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.clearList', msg.uid)) return ' [词库核心] word.edit.clearList 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.killList(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.还原回收站<词库名>',
+      command: /^.还原回收站([\s\S]+?)$/,
+      desc: '将回收站内某词库还原',
+      usage: '.还原回收站默认',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public recoveryList(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.recoveryList', msg.uid)) return ' [词库核心] word.edit.recoveryList 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.recoveryList(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.查看回收站列表',
+      command: /^.查看回收站列表$/,
+      desc: '查看回收站内的词库',
+      usage: '.查看回收站列表',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public backupList(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.recoveryList', msg.uid)) return ' [词库核心] word.edit.recoveryList 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.recoveryList(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.强删<词库名>',
+      command: /^.强删([\s\S]+?)$/,
+      desc: '不放入回收站直接删除词库',
+      usage: '.强删默认',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public mandatoryDelete(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.delet', msg.uid)) return ' [词库核心] word.edit.delet 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.mandatoryDelete(args[1]))
+    }
+
+    @app.decorators.Command({
+      name: '.添加开发者<对方id>',
+      command: /^.添加开发者\s\[@([\s\S]+?)@\]\s$/,
+      desc: '在当前词库添加此id为开发者',
+      usage: '.添加开发 [@5b0fe8a3b1ff2@] ',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public addWriter(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.addWriter', msg.uid)) return ' [词库核心] word.edit.addWriter 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.addWriter(args[1], msg.uid))
+    }
+
+    @app.decorators.Command({
+      name: '.删除开发者<对方id>',
+      command: /^.删除开发者\s\[@([\s\S]+?)@\]\s$/,
+      desc: '在当前词库删除此id为开发者',
+      usage: '.删除开发者 [@5b0fe8a3b1ff2@] ',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public rmWriter(msg: PublicMessageEvent, args: RegExpExecArray) {
+      if (!word.permissions.have('word.edit.rmWriter', msg.uid)) return ' [词库核心] word.edit.rmWriter 权限不足'
+
+      this.app.api.sendPublicMessage(word.editor.rmWriter(args[1], msg.uid))
+    }
+
+    @app.decorators.Command({
+      name: '.查看开发者<词库名>',
+      command: /^.查看开发者([\s\S]+?)$/,
+      desc: '查看某词库的开发者',
+      usage: '.查看开发者默认',
+      privateChat: true, // 是否接受私聊消息(可选，默认为true)
+      publicChat: true // 是否接受群聊消息(可选，默认为true)
+    })
+    public viewWriter(msg: PublicMessageEvent, args: RegExpExecArray) {
+      this.app.api.sendPublicMessage(word.editor.rmWriter(args[1], msg.uid))
+    }
+
+    // 设定背包清单值
+    // 删除背包清单中的某一项
+    // 查看的背包清单
+    // 添加主动式词库
+    // 删除主动词库
+    // 修改当前词库的存储库
+    // 上传
+    // 下载
   }
   return wordCore
 }

@@ -1,5 +1,5 @@
-// import * as fs from 'fs'
-// import * as path from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
 import * as api from '../Tools/index'
 import { messageReg } from '../Function/Config/regList/index'
 import { interpreter } from './api/index'
@@ -117,11 +117,54 @@ export default class {
     return outArr
   }
 
+  /**
+   * 开始解析某回答
+   * @param a 
+   * @param playData 
+   * @returns 
+   */
   start(a: string, playData: {[key: string]: string}) {
     let out = interpreter(a, playData)
     if (Array.isArray(out)) { out = out.join('') }
     return out
-  } // 执行回答
+  }
+
+  /**
+   * 查看某个物品的排行榜
+   * @param itemName 物品名称
+   * @param str { header:输出玩家名的前缀 ,body:输出玩家名的后缀 }
+   * @returns 排行榜
+   */
+  itemList (itemName:string, dbName:string, str?: { header: string; body: string }, mk?:boolean) {
+    const userData = fs.readdirSync(path.join(dir, './word/userData'))
+    const tempArr = {}
+    let outArr = mk ? ['# 排行榜', '|序号|ID|数量|','|:--|:--|:--|'] : ['[词库核心] 物品排行榜：', '']
+    let number = 0
+    const repository = (getjson('wordList', dbName).cache) ? getjson('wordList', dbName).cache : null
+    if (!repository) return
+    
+    userData.forEach(value => {
+      const name = value.match(/([\s\S]+?).json/).length > 1 ? value.match(/([\s\S]+?).json/)[1] : null
+      if (!name) { return }
+      
+      const data = (getjson('userData', name).repository) ? getjson('userData', name).repository : null
+      if (!data) { return }
+      const itemValue = (data[itemName] && typeof data[itemName] === 'number') ? data[itemName] : 0
+      
+      // 基础的获取玩家数据好了，接下来就是写排行榜
+      if (!tempArr[itemValue]) { tempArr[itemValue] = [] }
+      tempArr[itemValue].push(name)
+    })
+    const list = Object.keys(tempArr).sort(func)
+
+    list.forEach(value => {
+      number++
+      if (mk) { outArr.push(`${number} | ${str.header}${tempArr[value]}${str.body} | ${value}`) }
+      if (!mk) { outArr.push(`${number}.  ${str.header}${tempArr[value]}${str.body}  ${value}`) }
+    })
+
+    return outArr.join('\n')
+  }
 
   /*
   readPack(dbName: string) { } // 查看xxx词库背包
@@ -147,6 +190,9 @@ const joint = (list: string[], q: string) => {
   return outArr
 }
 
+const func = (a:string, b:string) => {
+  return Number(a) - Number(b)
+}
 /*
   wordCacheObj = {
       passive: { 触发词: [所拥有的词库] }
@@ -176,4 +222,8 @@ playData = {
   yname: ''
 }
 */
-
+/*
+suerData = {
+  存储库名:{item: num/arr/string}
+}
+*/

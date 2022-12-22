@@ -238,8 +238,14 @@ export default class {
    */
   killList (dbName: string) {
     if (this.wordObj.wordList.indexOf(dbName) === -1) { return ' [词库核心] 此词库不存在' }
+    const time = new Date()
+          
     try {
-      fs.renameSync(path.join(wordDir, `word/wordList/${dbName}.json`), path.join(wordDir, `word/recycleBin/${dbName}.json`))
+      const userData = fs.readdirSync(path.join(wordDir, './word/recycleBin'))
+      let newName = dbName.repeat(1)
+      if (userData.includes(`${dbName}.json`)) { newName = `${newName}_bak`}
+
+      fs.renameSync(path.join(wordDir, `word/wordList/${dbName}.json`), path.join(wordDir, `word/recycleBin/${newName}.json`))
       this.wordObj = this.getCacheWord()
 
       return ' [词库核心] 移动至回收站成功'
@@ -522,5 +528,10 @@ export default class {
     function: { // js代码 }
   }
 */
-
+/*
+{
+  存储库: {},
+  存储库2:{}
+}
+*/
 // Driver文件夹下有配置主动触发函数的文件 467
