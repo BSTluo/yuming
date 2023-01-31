@@ -5,5 +5,8 @@
     "better-sqlite3": "^7.6.2"
   },
   "main": "./dist/index.js",
-  "version": "1.4.2"
+  "version": "1.4.2",
+  "scripts": {
+    "dev": "tsc && node ./dist/index.js"
+  }
 }

@@ -62,6 +62,7 @@ export default class {
     playerData.data = {}
     playerData.data[playerData.mid] = api.command.getjson(dir, 'userData', playerData.mid)
 
+    
     if (wordCache.passive[q]) {
       const value = this.Change(joint(wordCache.passive[q], q), playerData)
       

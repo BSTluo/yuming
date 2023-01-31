@@ -36,10 +36,29 @@ export const funcPack:any = {
     mData[main] = mData[main] + Number(num)
 
     return num
+  },
+  减少: (inData: any, playData: any) => {
+    const cache = playData.cache
+    const reg = /([\s\S]+?)~([\s\S]+?)/
+    const main = inData[1]
+    let num = inData[2]
+    const who = inData[3] ? inData[3] : playData.mid
+    if (!playData.data[who]) { playData.data[who] = api.command.getjson(dir, 'userData', who) }
+    const mData = playData.data[who]
+    if (!mData[main]) { mData[main] = 0 }
+  
+    if (num.includes('all')) { num.replace('all', mData[main]) }
+
+    if (reg.test(num)) {
+      const value = num.match(reg)
+      num = random(Number(value[1]), Number(value[2]))
+    }
+
+    mData[main] = mData[main] - Number(num)
+    if (mData[main] > 0) { return num }
+    return next()
   }
 
-  // 添加
-  // 减少
   // 概率
   // 延迟
   // 鉴权

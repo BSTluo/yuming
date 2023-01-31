@@ -54,6 +54,8 @@ export default (app: App) => {
       publicChat: true // 是否接受群聊消息(可选，默认为true)
     })
     public addWord(msg: PublicMessageEvent, args: RegExpExecArray) {
+      console.log(msg)
+      console.log(args)
       if (!word.permissions.have('word.edit.add', msg.uid)) return this.app.api.sendPublicMessage(' [词库核心] word.edit.add 权限不足')
       // 发送消息
       this.app.api.sendPublicMessage(word.editor.add(args[1], args[2], msg.uid))
